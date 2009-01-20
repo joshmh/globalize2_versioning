@@ -1,0 +1,1 @@
+# Globalize2-versioning
