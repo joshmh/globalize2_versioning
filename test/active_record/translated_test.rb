@@ -9,8 +9,11 @@ rescue MissingSourceFile
   raise
 end
 
+require 'globalize2_versioning'
+
 # Hook up model translation
-ActiveRecord::Base.send(:include, Globalize::Model::ActiveRecord::Translated)
+ActiveRecord::Base.send :include, Globalize::Model::ActiveRecord::Translated
+ActiveRecord::Base.send :include, Globalize::Model::ActiveRecord::Versioned
 
 # Load Post model
 require File.join( File.dirname(__FILE__), '..', 'data', 'post' )
