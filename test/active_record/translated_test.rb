@@ -25,6 +25,25 @@ class TranslatedTest < ActiveSupport::TestCase
     reset_db!
   end
 
+  test "modifiying translated fields" do
+    post = Post.create :subject => 'foo'
+    assert_equal 'foo', post.subject
+    post.subject = 'bar'
+    assert_equal 'bar', post.subject    
+  end
+
+  test "modifiying translated fields while switching locales" do
+    post = Post.create :subject => 'foo'
+    assert_equal 'foo', post.subject
+    I18n.locale = :'de-DE'
+    post.subject = 'bar'
+    assert_equal 'bar', post.subject
+    I18n.locale = :'en-US'
+    assert_equal 'foo', post.subject
+    I18n.locale = :'de-DE'
+    post.subject = 'bar'
+  end
+  
   test "has post_translations" do
     post = Post.create
     assert_nothing_raised { post.globalize_translations }
@@ -179,10 +198,17 @@ class TranslatedTest < ActiveSupport::TestCase
     I18n.locale = 'de-DE'
     assert_equal 'bar', blog.posts.last.subject
   end
+  
+  test "works with simple dynamic finders" do
+    foo = Post.create :subject => 'foo'
+    Post.create :subject => 'bar'
+    post = Post.find_by_subject('foo')
+    assert_equal foo, post
+  end
 end
 
 # TODO error checking for fields that exist in main table, don't exist in
 # proxy table, aren't strings or text
 # 
 # TODO allow finding by translated attributes in conditions?
-# TODO generate dynamic finders?
+# TODO generate advanced dynamic finders?
