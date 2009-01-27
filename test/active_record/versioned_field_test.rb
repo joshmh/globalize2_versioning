@@ -18,34 +18,31 @@ ActiveRecord::Base.send :include, Globalize::Model::ActiveRecord::Versioned
 # Load Section model
 require File.join( File.dirname(__FILE__), '..', 'data', 'post' )
 
-class VersionedTest < ActiveSupport::TestCase
+# This test suite tests the versioned fields of the versioned model.
+class VersionedFieldTest < ActiveSupport::TestCase
   def setup
     I18n.locale = :'en-US'
     I18n.fallbacks.clear 
     reset_db!
   end
   
-  ########################################
-  # Test translated field only for Section
-  ########################################
-
   test "modifiying translated fields" do
-    section = Section.create :title => 'foo'
-    assert_equal 'foo', section.title
-    section.title = 'bar'
-    assert_equal 'bar', section.title    
+    section = Section.create :content => 'foo'
+    assert_equal 'foo', section.content
+    section.content = 'bar'
+    assert_equal 'bar', section.content    
   end
 
   test "modifiying translated fields while switching locales" do
-    section = Section.create :title => 'foo'
-    assert_equal 'foo', section.title
+    section = Section.create :content => 'foo'
+    assert_equal 'foo', section.content
     I18n.locale = :'de-DE'
-    section.title = 'bar'
-    assert_equal 'bar', section.title
+    section.content = 'bar'
+    assert_equal 'bar', section.content
     I18n.locale = :'en-US'
-    assert_equal 'foo', section.title
+    assert_equal 'foo', section.content
     I18n.locale = :'de-DE'
-    section.title = 'bar'
+    section.content = 'bar'
   end
   
   test "has section_translations" do
@@ -53,46 +50,42 @@ class VersionedTest < ActiveSupport::TestCase
     assert_nothing_raised { section.globalize_translations }
   end
 
-  test "returns the value passed to :title" do
+  test "returns the value passed to :content" do
     section = Section.new
-    assert_equal 'foo', (section.title = 'foo')
+    assert_equal 'foo', (section.content = 'foo')
   end
 
-  test "translates subject and content into en-US" do
-    section = Section.create :title => 'foo', :content => 'bar'
-    assert_equal 'foo', section.title 
-    assert_equal 'bar', section.content 
+  test "translates content into en-US" do
+    section = Section.create :content => 'foo'
+    assert_equal 'foo', section.content 
     assert section.save
     section.reload
-    assert_equal 'foo', section.title 
-    assert_equal 'bar', section.content 
+    assert_equal 'foo', section.content 
   end
 
   test "finds a German section" do
-    I18n.fallbacks.map 'de-DE' => [ 'en-US' ]
-    section = Section.create :title => 'foo (en)', :content => 'bar'
+    section = Section.create :content => 'foo (en)'
     I18n.locale = 'de-DE'
     section = Section.first
-    section.title = 'baz (de)'
-    assert section.save
-    assert_equal 'baz (de)', Section.first.title 
+    section.content = 'baz (de)'
+    section.save
+    assert_equal 'baz (de)', Section.first.content 
     I18n.locale = :'en-US'
-    assert_equal 'foo (en)', Section.first.title 
+    assert_equal 'foo (en)', Section.first.content 
   end
 
   test "saves an English section and loads test correctly" do
     assert_nil Section.first
-    section = Section.create :title => 'foo', :content => 'bar'
+    section = Section.create :content => 'foo'
     assert section.save
     section = Section.first
-    assert_equal 'foo', section.title 
-    assert_equal 'bar', section.content 
+    assert_equal 'foo', section.content 
   end
 
   test "updates an attribute" do
-    section = Section.create :title => 'foo', :content => 'bar'
-    section.update_attribute :title, 'baz'
-    assert_equal 'baz', Section.first.title 
+    section = Section.create :content => 'foo'
+    section.update_attribute :content, 'baz'
+    assert_equal 'baz', Section.first.content 
   end
 
   test "validates presence of :content" do
@@ -104,25 +97,25 @@ class VersionedTest < ActiveSupport::TestCase
   end
 
   test "returns the value for the correct locale, after locale switching" do
-    section = Section.create :title => 'foo', :content => 'bar'
+    section = Section.create :content => 'foo'
     I18n.locale = 'de-DE'
-    section.title = 'bar'
+    section.content = 'bar'
     section.save
     I18n.locale = 'en-US'
     section = Section.first
-    assert_equal 'foo', section.title 
+    assert_equal 'foo', section.content 
     I18n.locale = 'de-DE'
-    assert_equal 'bar', section.title 
+    assert_equal 'bar', section.content 
   end
 
   test "returns the value for the correct locale, after locale switching, without saving" do
-    section = Section.create :title => 'foo'
+    section = Section.create :content => 'foo'
     I18n.locale = 'de-DE'
-    section.title = 'bar'
+    section.content = 'bar'
     I18n.locale = 'en-US'
-    assert_equal 'foo', section.title 
+    assert_equal 'foo', section.content 
     I18n.locale = 'de-DE'
-    assert_equal 'bar', section.title 
+    assert_equal 'bar', section.content 
   end
 
   test "saves all locales, even after locale switching" do
@@ -131,7 +124,7 @@ class VersionedTest < ActiveSupport::TestCase
     section.content = 'bar'
     I18n.locale = 'he-IL'
     section.content = 'baz'
-    assert section.save
+    section.save
     I18n.locale = 'en-US'
     section = Section.first
     assert_equal 'foo', section.content 
@@ -143,25 +136,21 @@ class VersionedTest < ActiveSupport::TestCase
 
   test "resolves a simple fallback" do
     I18n.locale = 'de-DE'
-    section = Section.create :title => 'foo', :content => 'bar'
+    section = Section.create :content => 'foo'
     I18n.locale = 'de'
-    section.title = 'baz'
-    section.content = 'bar'
+    section.content = 'baz'
     section.save
     I18n.locale = 'de-DE'
-    assert_equal 'foo', section.title 
-    assert_equal 'bar', section.content 
+    assert_equal 'foo', section.content 
   end
 
   test "resolves a simple fallback without reloading" do
     I18n.locale = 'de-DE'
-    section = Section.new :title => 'foo'
+    section = Section.new :content => 'foo'
     I18n.locale = 'de'
-    section.title = 'baz'
-    section.content = 'bar'
+    section.content = 'baz'
     I18n.locale = 'de-DE'
-    assert_equal 'foo', section.title 
-    assert_equal 'bar', section.content 
+    assert_equal 'foo', section.content 
   end
 
   test "resolves a complex fallback without reloading" do
@@ -169,32 +158,55 @@ class VersionedTest < ActiveSupport::TestCase
     I18n.locale = 'de'
     section = Section.new
     I18n.locale = 'en'
-    section.title = 'foo'
+    section.content = 'foo'
     I18n.locale = 'he'
-    section.title = 'baz'
-    section.content = 'bar'
+    section.content = 'baz'
     I18n.locale = 'de'
-    assert_equal 'foo', section.title 
-    assert_equal 'bar', section.content 
+    assert_equal 'foo', section.content 
   end
 
   test "returns nil if no translations are found" do
-    section = Section.new :title => 'foo'
-    assert_equal 'foo', section.title
-    assert_nil section.content
+    section = Section.new :content => 'foo'
+    assert_equal 'foo', section.content
   end
 
   test "returns nil if no translations are found; reloaded" do
     section = Section.create :content => 'foo'
     section = Section.first
     assert_equal 'foo', section.content
-    assert_nil section.title
   end
   
   test "works with simple dynamic finders" do
-    foo = Section.create :title => 'foo', :content => 'bar'
-    Section.create :title => 'bar'
-    section = Section.find_by_title('foo')
+    foo = Section.create :content => 'foo'
+    Section.create :content => 'bar'
+    section = Section.find_by_content('foo')
     assert_equal foo, section
   end
+  
+=begin
+  
+  test "save_version?" do
+    flunk
+  end
+
+  test 'revert_to' do
+    flunk
+  end
+  
+  test 'revert_to!' do
+    flunk
+  end
+  
+  test 'versions association' do
+    flunk
+  end
+  
+  test 'save_version_on_create' do
+    flunk
+  end
+
+  test 'clone_versioned_model' do
+    flunk
+  end
+=end
 end

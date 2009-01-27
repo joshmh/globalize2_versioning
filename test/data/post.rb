@@ -11,5 +11,6 @@ end
 
 # These have translated and versioned fields
 class Section < ActiveRecord::Base
+  validates_presence_of :content
   translates :title, :content, :versioned => [ :content ]
 end
