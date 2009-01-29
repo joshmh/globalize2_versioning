@@ -2,7 +2,7 @@
 class Post < ActiveRecord::Base
   belongs_to :post
   translates :subject, :content
-  validates_presence_of :subject
+  validates_presence_of :subject  
 end
 
 class Blog < ActiveRecord::Base

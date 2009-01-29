@@ -1,3 +1,5 @@
+# This test suite tests the versioned fields of the versioned model.
+
 require File.join( File.dirname(__FILE__), '..', 'test_helper' )
 require 'active_record'
 
@@ -18,7 +20,6 @@ ActiveRecord::Base.send :include, Globalize::Model::ActiveRecord::Versioned
 # Load Section model
 require File.join( File.dirname(__FILE__), '..', 'data', 'post' )
 
-# This test suite tests the versioned fields of the versioned model.
 class VersionedFieldTest < ActiveSupport::TestCase
   def setup
     I18n.locale = :'en-US'
@@ -182,31 +183,5 @@ class VersionedFieldTest < ActiveSupport::TestCase
     section = Section.find_by_content('foo')
     assert_equal foo, section
   end
-  
-=begin
-  
-  test "save_version?" do
-    flunk
-  end
 
-  test 'revert_to' do
-    flunk
-  end
-  
-  test 'revert_to!' do
-    flunk
-  end
-  
-  test 'versions association' do
-    flunk
-  end
-  
-  test 'save_version_on_create' do
-    flunk
-  end
-
-  test 'clone_versioned_model' do
-    flunk
-  end
-=end
 end
