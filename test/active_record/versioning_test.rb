@@ -26,18 +26,43 @@ class VersioningTest < ActiveSupport::TestCase
     reset_db!
   end
   
-  test 'new record version' do
+  test 'versioned? method' do
+    post = Post.new
+    assert !post.versioned?
+    section = Section.new
+    assert section.versioned?
   end
   
+  test 'new record version' do
+    section = Section.create :content => 'foo'
+    assert_equal 1, section.version
+  end
+    
+  test 'subsequent version' do
+    section = Section.create :content => 'foo'
+    assert_equal 1, section.version
+    section.content = 'bar'
+    assert section.save
+    assert_equal 2, section.version
+    section.update_attribute(:content, 'baz')    
+    assert_equal 3, section.version
+  end
+  
+  test 'save_version? on new record' do
+    section = Section.new :content => 'foo'
+    assert section.save_version?
+  end
+
   test 'save_version?' do
     section = Section.create :content => 'foo'
     assert !section.save_version?
     section.title = 'bar'
     assert !section.save_version?
     section.content = 'baz'
-    assert !section.save_version?
+    assert section.save_version?
   end
 
+=begin
   test 'revert_to' do
     flunk
   end
@@ -57,4 +82,5 @@ class VersioningTest < ActiveSupport::TestCase
   test 'clone_versioned_model' do
     flunk
   end
+=end
 end

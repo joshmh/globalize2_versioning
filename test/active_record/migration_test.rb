@@ -1,3 +1,4 @@
+=begin
 require File.join( File.dirname(__FILE__), '..', '..', 'test_helper' )
 require 'active_record'
 require 'globalize/model/active_record'
@@ -71,3 +72,4 @@ class MigrationTest < ActiveSupport::TestCase
   end
 
 end
+=end
