@@ -12,6 +12,8 @@ $LOAD_PATH << File.expand_path( File.dirname(__FILE__) + '/../lib' )
 
 class ActiveSupport::TestCase
   def reset_db!( schema = 'schema' )
+    ::ActiveRecord::Base.logger = ActiveSupport::BufferedLogger.new( File.expand_path( File.dirname(__FILE__) + '/log/test.log' ) )
+    ::ActiveRecord::Base.clear_active_connections!
     ::ActiveRecord::Migration.verbose = false   # Quiet down the migration engine
     ::ActiveRecord::Base.establish_connection({
       :adapter => 'sqlite3',

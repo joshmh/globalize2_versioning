@@ -16,7 +16,6 @@ ActiveRecord::Schema.define do
   end
 
   create_table :sections, :force => true do |t|
-    t.integer     :version
   end
 
   create_table :section_translations, :force => true do |t|
@@ -25,6 +24,7 @@ ActiveRecord::Schema.define do
     t.references  :section
     t.string      :title
     t.text        :content
-  end
+    t.boolean     :current
+  end  
 end
   

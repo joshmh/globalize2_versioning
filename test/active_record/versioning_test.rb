@@ -48,6 +48,46 @@ class VersioningTest < ActiveSupport::TestCase
     assert_equal 3, section.version
   end
   
+  test 'current version' do
+    section = Section.create :content => 'foo'
+    assert_equal 1, section.version
+    section.content = 'bar'
+    assert section.save
+    assert_equal 2, section.version
+    section.update_attribute(:content, 'baz')    
+    assert_equal 3, section.version
+    section.reload
+    assert_equal 3, section.version
+    assert_equal 'baz', section.content
+  end
+  
+  test 'current version with locale switching' do
+    I18n.locale = :de
+    
+    section = Section.create :content => 'foo (de)'
+    assert_equal 1, section.globalize_translations.size
+    
+    section.update_attribute :content, 'bar (de)'    
+    assert_equal 2, section.globalize_translations.size
+
+    assert_equal 2, section.version
+    assert_equal 'bar (de)', section.content
+
+    I18n.locale = :en
+    section.update_attribute :content, 'foo'
+    assert_equal 1, section.version
+    section.update_attribute :content, 'bar'
+    assert_equal 2, section.version
+    section.update_attribute(:content, 'baz')    
+    assert_equal 3, section.version
+    section.reload
+    assert_equal 3, section.version
+
+    I18n.locale = :de    
+    assert_equal 2, section.version
+    assert_equal 'bar (de)', section.content
+  end
+  
   test 'save_version? on new record' do
     section = Section.new :content => 'foo'
     assert section.save_version?
