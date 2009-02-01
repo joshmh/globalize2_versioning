@@ -88,6 +88,70 @@ class VersioningTest < ActiveSupport::TestCase
     assert_equal 'bar (de)', section.content
   end
   
+  test 'current version with fallbacks' do
+    I18n.fallbacks.map :de => [ :en ]
+    section = Section.create :content => 'foo'
+    
+    I18n.locale = :de
+    assert_equal 'foo', section.content
+    assert_equal 1, section.version
+    
+    I18n.locale = :en
+    section.update_attribute :content, 'bar'
+    
+    I18n.locale = :de
+    assert_equal 'bar', section.content
+    
+    # TODO not sure what this should be, since there's no translation record for
+    # this locale. Should it be nil? 0? version of the original locale?
+    assert_equal 1, section.version
+
+    # load from db
+    section = Section.first
+    assert_equal 'bar', section.content
+    assert_equal 2, section.version
+
+    # load from db, then switch locale
+    I18n.locale = :en
+    section = Section.first
+    I18n.locale = :de
+    assert_equal 'bar', section.content
+    assert_equal 2, section.version
+  end
+  
+  test 'current current version with fallbacks -- current language has record' do
+    I18n.fallbacks.map :de => [ :en ]
+    section = Section.create :content => 'foo'
+    
+    I18n.locale = :de
+    assert_equal 'foo', section.content
+    assert_equal 1, section.version
+    
+    I18n.locale = :en
+    section.content = 'bar'
+    section.update_attribute :content, 'bar'
+    
+    I18n.locale = :de
+    section.update_attribute :content, 'bar'
+    assert_equal 2, section.version
+
+    section.update_attribute :content, 'bar (de)'
+    assert_equal 'bar (de)', section.content
+    assert_equal 3, section.version
+
+    # load from db
+    section = Section.first
+    assert_equal 'bar', section.content
+    assert_equal 2, section.version
+
+    # load from db, then switch locale
+    I18n.locale = :en
+    section = Section.first
+    I18n.locale = :de
+    assert_equal 'bar', section.content
+    assert_equal 2, section.version
+  end
+  
   test 'save_version? on new record' do
     section = Section.new :content => 'foo'
     assert section.save_version?

@@ -3,9 +3,11 @@ module Globalize
     class Adapter
       def update_translations!
         @stash.each do |locale, attrs|
+          next if attrs.empty?
           translation = nil
           if @record.versioned?
             translation = @record.globalize_translations.find_or_initialize_by_locale_and_current(locale.to_s, true)        
+            translation.version ||= 1
             if @record.save_version?
               translation = translation.clone unless @record.new_record?        
               translation.version = highest_version + 1
@@ -26,11 +28,7 @@ module Globalize
         # TODO do fallback thing
         @record.globalize_translations.maximum(:version, 
           :conditions => { :locale => locale.to_s, @record.class.name.underscore + '_id' => @record.id }) || 0
-      end
-      
-      private
-            
-      
+      end      
     end
     
     module ActiveRecord
@@ -61,9 +59,6 @@ module Globalize
           
           def version(locale = I18n.locale)
             translation = globalize_translations.find_by_locale_and_current(locale.to_s, true)
-    #        macro = @record.class.reflect_on_association(:globalize_translations)
-    #        translation = macro.klass.first(:conditions => 
-    #          { :locale => locale.to_s, @record.class.name.underscore + '_id' => @record.id, :current => true })
             translation ? translation.version : 1    
           end
                                         
