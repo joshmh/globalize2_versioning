@@ -59,7 +59,7 @@ module Globalize
           
           def version(locale = I18n.locale)
             translation = globalize_translations.find_by_locale_and_current(locale.to_s, true)
-            translation ? translation.version : 1    
+            translation ? translation.version : nil
           end
                                         
           # Checks whether a new version should be saved or not.
