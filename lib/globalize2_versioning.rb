@@ -4,22 +4,31 @@ module Globalize
       def update_translations!
         @stash.each do |locale, attrs|
           next if attrs.empty?
-          translation = nil
-          if @record.versioned?
-            translation = @record.globalize_translations.find_or_initialize_by_locale_and_current(locale.to_s, true)        
-            translation.version ||= 1
-            if @record.save_version?
-              translation = translation.clone unless @record.new_record?        
-              translation.version = highest_version + 1
+          ::ActiveRecord::Base.transaction do
+            translation = nil
+            if @record.versioned?
+              translation = @record.globalize_translations.find_or_initialize_by_locale_and_current(locale.to_s, true)        
+              translation.version ||= 1
+              if @record.save_version?
+                translation = translation.clone unless @record.new_record?        
+                translation.version = highest_version + 1
+              end
+              if translation.new_record?
+                translation.class.update_all( [ 'current = ?', false ],
+                  [ "current=? AND locale=? AND #{@record.class.name.underscore + '_id'}=?",
+                  true, locale.to_s, @record.id ] )
+              else
+              translation.class.update_all( [ 'current = ?', false ],
+                  [ "current=? AND locale=? AND #{@record.class.name.underscore + '_id'}=? AND id != ?",
+                  true, locale.to_s, @record.id, translation.id ] )
+              end
+              translation.current = true
+            else
+              translation = @record.globalize_translations.find_or_initialize_by_locale(locale.to_s)
             end
-            translation.class.update_all( [ 'current = ?', false ], 
-              { :current => true, :locale => locale.to_s, @record.class.name.underscore + '_id' => @record.id } ) 
-            translation.current = true
-          else
-            translation = @record.globalize_translations.find_or_initialize_by_locale(locale.to_s)
+            attrs.each{|attr_name, value| translation[attr_name] = value }
+            translation.save!
           end
-          attrs.each{|attr_name, value| translation[attr_name] = value }
-          translation.save!
         end
         @stash.clear
       end

@@ -92,6 +92,7 @@ class VersionedTest < ActiveSupport::TestCase
   test "updates an attribute" do
     section = Section.create :title => 'foo', :content => 'bar'
     section.update_attribute :title, 'baz'
+    section = Section.first
     assert_equal 'baz', Section.first.title 
   end
 
