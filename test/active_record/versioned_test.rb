@@ -96,6 +96,25 @@ class VersionedTest < ActiveSupport::TestCase
     assert_equal 'baz', Section.first.title 
   end
 
+  test "updates an attribute with fallback" do
+    I18n.fallbacks.map :de => [ :'en-US' ]
+    section = Section.create :title => 'foo', :content => 'bar'
+    section.update_attribute :title, 'baz'
+    assert_equal 'baz', section.title
+
+    I18n.locale = :de
+    assert_equal 'baz', section.title
+
+    I18n.locale = :'en-US'
+    
+    section = Section.first
+    assert_equal 'baz', section.title
+    
+    I18n.locale = :de
+    assert_equal 'baz', section.title
+    assert_equal 'baz', Section.first.title
+  end
+
   test "validates presence of :content" do
     section = Section.new
     assert !section.save

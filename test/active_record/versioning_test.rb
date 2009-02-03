@@ -262,5 +262,31 @@ class VersioningTest < ActiveSupport::TestCase
     assert_equal 'bar', section.content
     assert_equal 2, section.version    
     I18n.locale = :de      
-  end    
+  end
+  
+  test 'revert_to and then saving another version' do
+    section = Section.create :content => 'foo'
+    section.update_attribute :content, 'bar'    
+    section.update_attribute :content, 'baz'
+    section.revert_to 2
+
+    section.update_attribute :content, 'qux'
+    assert_equal 'qux', section.content
+    assert_equal 4, section.version
+        
+    # load from db
+    section = Section.first
+    assert_equal 'qux', section.content
+    assert_equal 4, section.version    
+
+    section.revert_to 3
+
+    assert_equal 'baz', section.content
+    assert_equal 3, section.version
+        
+    # load from db
+    section = Section.first
+    assert_equal 'baz', section.content
+    assert_equal 3, section.version      
+  end
 end
