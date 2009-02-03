@@ -61,7 +61,21 @@ module Globalize
             translation = globalize_translations.find_by_locale_and_current(locale.to_s, true)
             translation ? translation.version : nil
           end
-                                        
+          
+          def revert_to(version, locale = I18n.locale)
+            new_translation = globalize_translations.find_by_locale_and_version(locale.to_s, version)
+            return false unless new_translation
+            translation = globalize_translations.find_by_locale_and_current(locale.to_s, true)
+            transaction do
+              translation.update_attribute :current, false
+              new_translation.update_attribute :current, true
+            end
+            
+            # clear out cache
+            globalize.clear
+            true
+          end
+                                       
           # Checks whether a new version should be saved or not.
           def save_version?
             new_record? || ( globalize_options[:versioned].map {|k| k.to_s } & changed ).length > 0

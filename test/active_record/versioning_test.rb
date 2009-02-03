@@ -174,6 +174,11 @@ class VersioningTest < ActiveSupport::TestCase
     assert section.save_version?
   end
 
+  test 'save_version_on_create' do
+    section = Section.create :content => 'foo'
+    assert !section.save_version?
+  end
+
   test 'save_version?' do
     section = Section.create :content => 'foo'
     assert !section.save_version?
@@ -183,25 +188,79 @@ class VersioningTest < ActiveSupport::TestCase
     assert section.save_version?
   end
 
-=begin
   test 'revert_to' do
-    flunk
-  end
-  
-  test 'revert_to!' do
-    flunk
-  end
-  
-  test 'versions association' do
-    flunk
-  end
-  
-  test 'save_version_on_create' do
-    flunk
+    section = Section.create :content => 'foo'
+    section.update_attribute :content, 'bar'    
+    section.update_attribute :content, 'baz'
+    assert_equal 'baz', section.content
+    assert_equal 3, section.version
+    section.revert_to 1
+    assert_equal 'foo', section.content
+    assert_equal 1, section.version
+    section.revert_to 2
+    assert_equal 'bar', section.content
+    assert_equal 2, section.version
+    
+    # load from db
+    section = Section.first
+    assert_equal 'bar', section.content
+    assert_equal 2, section.version    
   end
 
-  test 'clone_versioned_model' do
-    flunk
-  end
-=end
+  test 'revert_to with callbacks' do
+    I18n.fallbacks.map :de => [ :en ]
+  
+    section = Section.create :content => 'foo'
+    section.update_attribute :content, 'bar'    
+    section.update_attribute :content, 'baz'
+    assert_equal 'baz', section.content
+    assert_equal 3, section.version
+
+    # :de
+    I18n.locale = :de
+    section.update_attribute :content, 'baz (de)'
+    section.update_attribute :content, 'qux (de)'
+    assert_equal 2, section.version
+    
+    I18n.locale = :en
+    section.revert_to 1
+    assert_equal 'foo', section.content
+    assert_equal 1, section.version
+
+    I18n.locale = :de
+    assert_equal 2, section.version
+    assert_equal 'qux (de)', section.content
+    I18n.locale = :en
+    
+    section.revert_to 2
+    assert_equal 'bar', section.content
+    assert_equal 2, section.version
+    
+    # load from db
+    section = Section.first
+    assert_equal 'bar', section.content
+    assert_equal 2, section.version    
+
+    I18n.locale = :de
+    assert_equal 2, section.version
+    assert_equal 'qux (de)', section.content
+    
+    section.revert_to 1
+    assert_equal 1, section.version
+    assert_equal 'baz (de)', section.content
+
+    I18n.locale = :en
+    assert_equal 'bar', section.content
+    assert_equal 2, section.version    
+    I18n.locale = :de
+
+    section = Section.first
+    assert_equal 1, section.version
+    assert_equal 'baz (de)', section.content
+
+    I18n.locale = :en
+    assert_equal 'bar', section.content
+    assert_equal 2, section.version    
+    I18n.locale = :de      
+  end    
 end
