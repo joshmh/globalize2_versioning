@@ -289,4 +289,9 @@ class VersioningTest < ActiveSupport::TestCase
     assert_equal 'baz', section.content
     assert_equal 3, section.version      
   end
+  
+  test 'versioned_attributes method' do
+    assert_equal [ :content ], Section.versioned_attributes
+  end
+  
 end

@@ -54,6 +54,7 @@ module Globalize
               define_method :'versioned?', lambda { false }
             else
               include Versioned::InstanceMethods
+              extend  Versioned::ClassMethods
             end
           end
         end
@@ -69,9 +70,15 @@ module Globalize
       end
       
       module Versioned
+        module ClassMethods
+          def versioned_attributes
+            globalize_options[:versioned]
+          end
+        end
+        
         module InstanceMethods
           def versioned?; true end
-          
+                    
           def version(locale = I18n.locale)
             translation = globalize_translations.find_by_locale_and_current(locale.to_s, true)
             translation ? translation.version : nil

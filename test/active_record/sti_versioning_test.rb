@@ -126,5 +126,9 @@ class StiVersioningTest < ActiveSupport::TestCase
     assert_equal 'bar', wiki.article
     assert_equal 2, wiki.version    
   end
+
+  test 'versioned_attributes method' do
+    assert_equal [ :article ], Wiki.versioned_attributes
+  end
   
 end
