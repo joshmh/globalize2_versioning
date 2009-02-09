@@ -25,6 +25,19 @@ ActiveRecord::Schema.define do
     t.string      :title
     t.text        :content
     t.boolean     :current
-  end  
+  end
+  
+  create_table :contents, :force => true do |t|
+    t.string      :type
+  end
+
+  create_table :content_translations, :force => true do |t|
+    t.integer     :version
+    t.string      :locale
+    t.references  :content
+    t.string      :title
+    t.text        :article
+    t.boolean     :current
+  end
 end
   

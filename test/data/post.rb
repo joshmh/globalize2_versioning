@@ -14,3 +14,10 @@ class Section < ActiveRecord::Base
   validates_presence_of :content
   translates :title, :content, :versioned => [ :content ]
 end
+
+class Content < ActiveRecord::Base
+  translates :title, :article, :versioned => [ :article ]
+end
+
+class Wiki < Content
+end

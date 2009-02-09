@@ -15,11 +15,11 @@ module Globalize
               end
               if translation.new_record?
                 translation.class.update_all( [ 'current = ?', false ],
-                  [ "current=? AND locale=? AND #{@record.class.name.underscore + '_id'}=?",
+                  [ "current=? AND locale=? AND #{reference_field}=?",
                   true, locale.to_s, @record.id ] )
               else
               translation.class.update_all( [ 'current = ?', false ],
-                  [ "current=? AND locale=? AND #{@record.class.name.underscore + '_id'}=? AND id != ?",
+                  [ "current=? AND locale=? AND #{reference_field}=? AND id != ?",
                   true, locale.to_s, @record.id, translation.id ] )
               end
               translation.current = true
@@ -36,8 +36,14 @@ module Globalize
       def highest_version(locale = I18n.locale)
         # TODO do fallback thing
         @record.globalize_translations.maximum(:version, 
-          :conditions => { :locale => locale.to_s, @record.class.name.underscore + '_id' => @record.id }) || 0
-      end      
+          :conditions => { :locale => locale.to_s, reference_field => @record.id }) || 0
+      end
+      
+      private
+      
+      def reference_field
+        @record.class.base_class.name.underscore + '_id'
+      end    
     end
     
     module ActiveRecord
