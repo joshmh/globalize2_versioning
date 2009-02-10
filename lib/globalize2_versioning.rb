@@ -179,6 +179,10 @@ module Globalize
           def last
             @rec.globalize_translations.maximum( :version, :conditions => [ 'locale = ?', I18n.locale.to_s ] )
           end
+          
+          def empty?
+            count == 0
+          end
         end
                 
       end   # Versioned

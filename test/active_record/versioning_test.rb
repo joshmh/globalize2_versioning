@@ -306,6 +306,7 @@ class VersioningTest < ActiveSupport::TestCase
   
   test 'version limit' do
     section = Section.create :content => 'foo1'
+    assert !section.versions.empty?
     section.update_attribute :content, 'foo2'
     section.update_attribute :content, 'foo3'
     section.update_attribute :content, 'foo4'
@@ -317,6 +318,11 @@ class VersioningTest < ActiveSupport::TestCase
     section.update_attribute :content, 'foo7'
     assert_nil section.globalize_translations.find_by_locale_and_version(I18n.locale.to_s, 2)
     assert_not_nil section.globalize_translations.find_by_locale_and_version(I18n.locale.to_s, 3)
+  end
+  
+  test 'empty versions' do
+    section = Section.new
+    assert section.versions.empty?
   end
   
   test 'version count' do
