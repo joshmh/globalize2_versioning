@@ -1,15 +1,24 @@
-=begin
-require File.join( File.dirname(__FILE__), '..', '..', 'test_helper' )
+require File.join( File.dirname(__FILE__), '..', 'test_helper' )
 require 'active_record'
-require 'globalize/model/active_record'
+
+begin
+  require 'globalize/model/active_record'
+rescue MissingSourceFile
+  puts "This plugin requires the Globalize2 plugin: http://github.com/joshmh/globalize2/tree/master"
+  puts
+  raise
+end
+
+require 'globalize2_versioning'
 
 # Hook up model translation
-ActiveRecord::Base.send(:include, Globalize::Model::ActiveRecord::Translated)
+ActiveRecord::Base.send :include, Globalize::Model::ActiveRecord::Translated
+ActiveRecord::Base.send :include, Globalize::Model::ActiveRecord::Versioned
 
-# Load Post model
-require File.join( File.dirname(__FILE__), '..', '..', 'data', 'post' )
+# Load Section model
+require File.join( File.dirname(__FILE__), '..', 'data', 'post' )
 
-class MigrationTest < ActiveSupport::TestCase
+class VersionedMigrationTest < ActiveSupport::TestCase
   def setup
     reset_db! 'no_globalize_schema'
   end
@@ -31,6 +40,10 @@ class MigrationTest < ActiveSupport::TestCase
     assert_equal :datetime, created_at.type
     assert updated_at = columns.detect {|c| c.name == 'updated_at' }
     assert_equal :datetime, updated_at.type
+    
+    # versioning fields should not be present
+    assert !columns.detect {|c| c.name == 'version' }
+    assert !columns.detect {|c| c.name == 'current' }    
   end
   
   test 'globalize table dropped' do
@@ -72,4 +85,3 @@ class MigrationTest < ActiveSupport::TestCase
   end
 
 end
-=end
