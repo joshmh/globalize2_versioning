@@ -131,4 +131,23 @@ class StiVersioningTest < ActiveSupport::TestCase
     assert_equal [ :article ], Wiki.versioned_attributes
   end
   
+  test 'max_version_limit' do
+    assert_equal 5, Wiki.max_version_limit
+  end
+  
+  test 'version limit' do
+    wiki = Wiki.create :article => 'foo1'
+    wiki.update_attribute :article, 'foo2'
+    wiki.update_attribute :article, 'foo3'
+    wiki.update_attribute :article, 'foo4'
+    wiki.update_attribute :article, 'foo5'
+    assert_not_nil wiki.globalize_translations.find_by_locale_and_version(I18n.locale.to_s, 1)
+    wiki.update_attribute :article, 'foo6'
+    assert_nil wiki.globalize_translations.find_by_locale_and_version(I18n.locale.to_s, 1)
+    assert_not_nil wiki.globalize_translations.find_by_locale_and_version(I18n.locale.to_s, 2)
+    wiki.update_attribute :article, 'foo7'
+    assert_nil wiki.globalize_translations.find_by_locale_and_version(I18n.locale.to_s, 2)
+    assert_not_nil wiki.globalize_translations.find_by_locale_and_version(I18n.locale.to_s, 3)
+  end  
+  
 end

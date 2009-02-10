@@ -294,4 +294,22 @@ class VersioningTest < ActiveSupport::TestCase
     assert_equal [ :content ], Section.versioned_attributes
   end
   
+  test 'max_version_limit' do
+    assert_equal 5, Section.max_version_limit
+  end
+  
+  test 'version limit' do
+    section = Section.create :content => 'foo1'
+    section.update_attribute :content, 'foo2'
+    section.update_attribute :content, 'foo3'
+    section.update_attribute :content, 'foo4'
+    section.update_attribute :content, 'foo5'
+    assert_not_nil section.globalize_translations.find_by_locale_and_version(I18n.locale.to_s, 1)
+    section.update_attribute :content, 'foo6'
+    assert_nil section.globalize_translations.find_by_locale_and_version(I18n.locale.to_s, 1)
+    assert_not_nil section.globalize_translations.find_by_locale_and_version(I18n.locale.to_s, 2)
+    section.update_attribute :content, 'foo7'
+    assert_nil section.globalize_translations.find_by_locale_and_version(I18n.locale.to_s, 2)
+    assert_not_nil section.globalize_translations.find_by_locale_and_version(I18n.locale.to_s, 3)
+  end
 end

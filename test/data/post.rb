@@ -12,11 +12,11 @@ end
 # These have translated and versioned fields
 class Section < ActiveRecord::Base
   validates_presence_of :content
-  translates :title, :content, :versioned => [ :content ]
+  translates :title, :content, :versioned => [ :content ], :limit => 5
 end
 
 class Content < ActiveRecord::Base
-  translates :title, :article, :versioned => [ :article ]
+  translates :title, :article, :versioned => [ :article ], :limit => 5
 end
 
 class Wiki < Content

@@ -39,8 +39,6 @@ module Globalize
           :conditions => { :locale => locale.to_s, reference_field => @record.id }) || 0
       end
       
-      private
-      
       def reference_field
         @record.class.base_class.name.underscore + '_id'
       end    
@@ -55,6 +53,9 @@ module Globalize
             else
               include Versioned::InstanceMethods
               extend  Versioned::ClassMethods
+              class_inheritable_accessor :max_version_limit
+              self.max_version_limit = globalize_options[:limit].to_i
+              after_save :clear_old_versions
             end
           end
         end
@@ -73,7 +74,7 @@ module Globalize
         module ClassMethods
           def versioned_attributes
             globalize_options[:versioned]
-          end
+          end          
         end
         
         module InstanceMethods
@@ -101,9 +102,23 @@ module Globalize
           # Checks whether a new version should be saved or not.
           def save_version?
             new_record? || ( globalize_options[:versioned].map {|k| k.to_s } & changed ).length > 0
-          end                
-        end        
-      end
-    end
-  end
-end
+          end
+          
+          private
+          
+          def clear_old_versions(locale = I18n.locale)
+            if self.class.max_version_limit > 0
+              old_version = version - self.class.max_version_limit
+              if old_version > 0
+                "#{self.class.base_class.name}Translation".constantize.delete_all [ 
+                  "version <= ? AND locale = ? AND #{globalize.reference_field} = ?", 
+                  old_version, locale.to_s, self.id ]
+              end
+            end
+          end
+                          
+        end # InstanceMethods        
+      end   # Versioned
+    end     # ActiveRecord
+  end       # Model
+end         # Globalize
