@@ -131,10 +131,17 @@ module Globalize
             globalize.clear
             true
           end
-                                       
+
+          def save_without_revision
+            @no_revision = true
+            result = save
+            @no_revision = false
+            result
+          end
+                                                 
           # Checks whether a new version should be saved or not.
           def save_version?
-            new_record? || ( globalize_options[:versioned].map {|k| k.to_s } & changed ).length > 0
+            !@no_revision && ( new_record? || ( globalize_options[:versioned].map {|k| k.to_s } & changed ).length > 0 )
           end
           
           def versions
