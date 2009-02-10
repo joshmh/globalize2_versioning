@@ -312,4 +312,41 @@ class VersioningTest < ActiveSupport::TestCase
     assert_nil section.globalize_translations.find_by_locale_and_version(I18n.locale.to_s, 2)
     assert_not_nil section.globalize_translations.find_by_locale_and_version(I18n.locale.to_s, 3)
   end
+  
+  test 'version count' do
+    section = Section.create :content => 'foo1'
+    assert_equal 1, section.versions.count
+    assert_equal 1, section.versions.first
+    assert_equal 1, section.versions.last
+    
+    section.update_attribute :content, 'foo2'
+    assert_equal 2, section.versions.count
+    assert_equal 1, section.versions.first
+    assert_equal 2, section.versions.last
+    
+    section.update_attribute :content, 'foo3'
+    assert_equal 3, section.versions.count
+    assert_equal 1, section.versions.first
+    assert_equal 3, section.versions.last
+
+    section.update_attribute :content, 'foo4'
+    assert_equal 4, section.versions.count
+    assert_equal 1, section.versions.first
+    assert_equal 4, section.versions.last
+
+    section.revert_to 2
+    assert_equal 4, section.versions.count
+    assert_equal 1, section.versions.first
+    assert_equal 4, section.versions.last
+
+    section.update_attribute :content, 'foo5'
+    assert_equal 5, section.versions.count
+    assert_equal 1, section.versions.first
+    assert_equal 5, section.versions.last
+
+    section.update_attribute :content, 'foo6'
+    assert_equal 5, section.versions.count
+    assert_equal 2, section.versions.first
+    assert_equal 6, section.versions.last
+  end
 end

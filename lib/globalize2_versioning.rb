@@ -104,6 +104,10 @@ module Globalize
             new_record? || ( globalize_options[:versioned].map {|k| k.to_s } & changed ).length > 0
           end
           
+          def versions
+            @globalize_version_proxy ||= ProxyHelper.new self
+          end
+          
           private
           
           def clear_old_versions(locale = I18n.locale)
@@ -117,7 +121,26 @@ module Globalize
             end
           end
                           
-        end # InstanceMethods        
+        end # InstanceMethods
+          
+        class ProxyHelper
+          def initialize(rec)
+            @rec = rec
+          end
+          
+          def count
+            @rec.globalize_translations.count( :conditions => [ 'locale = ?', I18n.locale.to_s ] )
+          end
+          
+          def first
+            @rec.globalize_translations.minimum( :version, :conditions => [ 'locale = ?', I18n.locale.to_s ] )
+          end
+          
+          def last
+            @rec.globalize_translations.maximum( :version, :conditions => [ 'locale = ?', I18n.locale.to_s ] )
+          end
+        end
+                
       end   # Versioned
     end     # ActiveRecord
   end       # Model
