@@ -167,13 +167,25 @@ module Globalize
           def initialize(rec)
             @rec = rec
           end
-          
+                    
           def count
             @rec.globalize_translations.count( :conditions => [ 'locale = ?', I18n.locale.to_s ] )
           end
           
           def first
             @rec.globalize_translations.minimum( :version, :conditions => [ 'locale = ?', I18n.locale.to_s ] )
+          end
+          
+          def second
+            rec = @rec.globalize_translations.first :conditions => [ 'locale = ?', I18n.locale.to_s ],
+              :offset => 1, :order => 'version ASC'
+            rec && rec.version
+          end
+          
+          def third
+            rec = @rec.globalize_translations.first :conditions => [ 'locale = ?', I18n.locale.to_s ],
+              :offset => 2, :order => 'version ASC'
+            rec && rec.version
           end
           
           def last

@@ -38,6 +38,6 @@ ActiveRecord::Schema.define do
     t.string      :title
     t.text        :article
     t.boolean     :current
-  end
+  end  
 end
   

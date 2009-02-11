@@ -23,7 +23,7 @@ require File.join( File.dirname(__FILE__), '..', 'data', 'post' )
 class StiVersioningTest < ActiveSupport::TestCase
   def setup
     I18n.fallbacks.clear 
-    reset_db!
+    reset_db! File.expand_path(File.join(File.dirname(__FILE__), '..', 'data', 'schema.rb'))
     I18n.locale = :en
   end
   

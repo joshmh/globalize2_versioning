@@ -23,7 +23,7 @@ require File.join( File.dirname(__FILE__), '..', 'data', 'post' )
 class VersioningTest < ActiveSupport::TestCase
   def setup
     I18n.fallbacks.clear 
-    reset_db!
+    reset_db! File.expand_path(File.join(File.dirname(__FILE__), '..', 'data', 'schema.rb'))
     I18n.locale = :en
   end
   
@@ -360,6 +360,36 @@ class VersioningTest < ActiveSupport::TestCase
     assert_equal 5, section.versions.count
     assert_equal 2, section.versions.first
     assert_equal 6, section.versions.last
+  end
+  
+  test 'versions second and third' do
+    section = Section.create :content => 'foo1'
+    assert_nil section.versions.second
+    assert_nil section.versions.third
+    
+    section.update_attribute :content, 'foo2'
+    assert_equal 2, section.versions.second
+    assert_nil section.versions.third
+    
+    section.update_attribute :content, 'foo3'
+    assert_equal 2, section.versions.second
+    assert_equal 3, section.versions.third
+
+    section.update_attribute :content, 'foo4'
+    assert_equal 2, section.versions.second
+    assert_equal 3, section.versions.third
+
+    section.revert_to 2
+    assert_equal 2, section.versions.second
+    assert_equal 3, section.versions.third
+
+    section.update_attribute :content, 'foo5'
+    assert_equal 2, section.versions.second
+    assert_equal 3, section.versions.third
+
+    section.update_attribute :content, 'foo6'
+    assert_equal 3, section.versions.second
+    assert_equal 4, section.versions.third
   end
   
   test 'save_without_revision' do

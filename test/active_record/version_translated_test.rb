@@ -22,7 +22,7 @@ class VersionTranslatedTest < ActiveSupport::TestCase
   def setup
     I18n.locale = :'en-US'
     I18n.fallbacks.clear 
-    reset_db!
+    reset_db! File.expand_path(File.join(File.dirname(__FILE__), '..', 'data', 'schema.rb'))
   end
 
   test "modifiying translated fields" do

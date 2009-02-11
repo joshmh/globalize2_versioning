@@ -2,25 +2,8 @@ require 'rubygems'
 require 'test/unit'
 require 'active_support'
 require 'active_support/test_case'
-
-# globalize2 lib
-$LOAD_PATH << File.expand_path( File.join( File.dirname(__FILE__), '..', '..', 
-  'globalize2', 'lib' ) )
+require File.expand_path( File.join( File.dirname(__FILE__), '..', '..', 
+  'globalize2', 'test', 'test_helper' ) )
 
 # globalize2_versioning lib
 $LOAD_PATH << File.expand_path( File.dirname(__FILE__) + '/../lib' )
-
-class ActiveSupport::TestCase
-  def reset_db!( schema = 'schema' )
-    ::ActiveRecord::Base.logger = ActiveSupport::BufferedLogger.new( File.expand_path( File.dirname(__FILE__) + '/log/test.log' ) )
-    ::ActiveRecord::Base.clear_active_connections!
-    ::ActiveRecord::Migration.verbose = false   # Quiet down the migration engine
-    ::ActiveRecord::Base.establish_connection({
-      :adapter => 'sqlite3',
-      :dbfile => ':memory:'
-    })
-    ::ActiveRecord::Base.silence do
-      load File.expand_path(File.join(File.dirname(__FILE__), 'data', schema + '.rb'))
-    end
-  end
-end
