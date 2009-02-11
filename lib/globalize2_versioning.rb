@@ -140,7 +140,11 @@ module Globalize
                                                  
           # Checks whether a new version should be saved or not.
           def save_version?
-            !@no_revision && ( new_record? || ( globalize_options[:versioned].map {|k| k.to_s } & changed ).length > 0 )
+            return false  if @no_revision
+            return true   if new_record?
+            change_fields = globalize_options[:if_changed].blank? ?
+              globalize_options[:versioned] : globalize_options[:if_changed]
+            ( change_fields.map {|k| k.to_s } & changed ).length > 0
           end
           
           def versions

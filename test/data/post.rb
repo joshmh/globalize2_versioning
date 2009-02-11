@@ -28,3 +28,8 @@ end
 
 class Wiki < Content
 end
+
+# Has versioned attributes, but only one triggers new version
+class Product < ActiveRecord::Base
+  translates :title, :content, :versioned => [ :title, :content ], :if_changed => [ :content ]
+end

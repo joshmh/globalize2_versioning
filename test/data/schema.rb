@@ -34,10 +34,22 @@ ActiveRecord::Schema.define do
   create_table :content_translations, :force => true do |t|
     t.integer     :version
     t.string      :locale
-    t.references  :content
     t.string      :title
     t.text        :article
     t.boolean     :current
   end  
+
+  create_table :products, :force => true do |t|
+  end
+
+  create_table :product_translations, :force => true do |t|
+    t.integer     :version
+    t.string      :locale
+    t.references  :product
+    t.string      :title
+    t.text        :content
+    t.boolean     :current
+  end  
+
 end
   

@@ -433,4 +433,21 @@ class VersioningTest < ActiveSupport::TestCase
 
     assert_equal 1, section.versions.count
   end
+  
+  test 'if_changed argument' do
+    product = Product.create :title => 'foo', :content => 'bar'
+    assert_equal 1, product.version
+    product.update_attribute :title, 'baz'
+    assert_equal 'baz', product.title
+    assert_equal 1, product.version
+    product.update_attribute :content, 'qux'
+    assert_equal 'baz', product.title
+    assert_equal 'qux', product.content
+    assert_equal 2, product.version
+    product = Product.first
+    assert_equal 'baz', product.title
+    assert_equal 'qux', product.content
+    assert_equal 2, product.version
+    
+  end
 end
