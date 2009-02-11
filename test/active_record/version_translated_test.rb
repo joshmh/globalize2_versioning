@@ -25,7 +25,7 @@ class VersionTranslatedTest < ActiveSupport::TestCase
     reset_db! File.expand_path(File.join(File.dirname(__FILE__), '..', 'data', 'schema.rb'))
   end
 
-  test "modifiying translated fields" do
+  test "modifying translated fields" do
     post = Post.create :subject => 'foo'
     assert_equal 'foo', post.subject
     post.subject = 'bar'
