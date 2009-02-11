@@ -391,7 +391,33 @@ class VersioningTest < ActiveSupport::TestCase
     assert_equal 3, section.versions.second
     assert_equal 4, section.versions.third
   end
-  
+    
+  test 'versions[]' do
+    section = Section.create :content => 'foo1'
+    assert_equal 'foo1', section.versions[1].content
+    assert section.versions[1].readonly?
+    assert_nil section.versions[2]
+    assert_nil section.versions[0]
+    
+    section.update_attribute :content, 'foo2'
+    assert_equal 'foo1', section.versions[1].content
+    assert_equal 'foo2', section.versions[2].content
+    
+    section.update_attribute :content, 'foo3'
+    section.update_attribute :content, 'foo4'
+    section.revert_to 2
+    assert_equal 'foo3', section.versions[3].content
+    assert_equal 'foo4', section.versions[4].content
+
+    section.update_attribute :content, 'foo5'
+    assert_equal 'foo5', section.versions[5].content
+    assert_equal 'foo1', section.versions[1].content
+
+    section.update_attribute :content, 'foo6'
+    assert_equal 'foo6', section.versions[6].content
+    assert_nil section.versions[1]
+  end
+
   test 'save_without_revision' do
     section = Section.create :content => 'foo'
     assert 1, section.version

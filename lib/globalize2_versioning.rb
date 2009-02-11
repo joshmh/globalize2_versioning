@@ -34,7 +34,6 @@ module Globalize
       end
 
       def highest_version(locale = I18n.locale)
-        # TODO do fallback thing
         @record.globalize_translations.maximum(:version, 
           :conditions => { :locale => locale.to_s, reference_field => @record.id }) || 0
       end
@@ -166,6 +165,12 @@ module Globalize
         class ProxyHelper
           def initialize(rec)
             @rec = rec
+          end
+          
+          def [](ver)
+            rec = @rec.globalize_translations.find_by_locale_and_version( I18n.locale.to_s, ver )
+            rec.readonly! if rec
+            rec
           end
                     
           def count
