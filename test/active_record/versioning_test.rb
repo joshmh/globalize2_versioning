@@ -448,6 +448,13 @@ class VersioningTest < ActiveSupport::TestCase
     assert_equal 'baz', product.title
     assert_equal 'qux', product.content
     assert_equal 2, product.version
-    
+  end
+  
+  test 'no update if validation fails' do
+    section = Section.create :content => 'foo'
+    assert_equal 'foo', section.content
+    section.content = ''
+    assert !section.save
+    assert_equal 'foo', section.reload.content
   end
 end
