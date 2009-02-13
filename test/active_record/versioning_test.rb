@@ -220,6 +220,14 @@ class VersioningTest < ActiveSupport::TestCase
     assert_equal 'bar', section.content
     assert_equal 2, section.version
   end
+
+  test 'revert_to same version (version is string)' do
+    section = Section.create :content => 'foo'
+    section.update_attribute :content, 'bar'    
+    assert section.revert_to('2')
+    assert_equal 'bar', section.content
+    assert_equal 2, section.version
+  end
   
   test 'revert_to with callbacks' do
     I18n.fallbacks.map :de => [ :en ]
