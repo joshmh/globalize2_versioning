@@ -118,6 +118,7 @@ module Globalize
           end
           
           def revert_to(version, locale = I18n.locale)
+            return true if version == self.version
             new_translation = globalize_translations.find_by_locale_and_version(locale.to_s, version)
             return false unless new_translation
             translation = globalize_translations.find_by_locale_and_current(locale.to_s, true)
