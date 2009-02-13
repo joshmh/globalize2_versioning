@@ -481,4 +481,12 @@ class VersioningTest < ActiveSupport::TestCase
     section.revert_to 1
     assert section.update_attributes( {} )    
   end
+
+  test 'update_attributes failure' do
+    section = Section.create :content => 'foo'
+    assert !section.update_attributes( { :content => '' } )    
+    assert_nil section.reload.attributes['content']
+    assert_equal 'foo', section.content
+  end
+
 end
